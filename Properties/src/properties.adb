@@ -35,12 +35,9 @@
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 with Ada.Calendar;                  use Ada.Calendar;
-with Ada.Containers.Hashed_Maps;    use Ada.Containers;
 with Ada.Strings;
-with Ada.Strings.Unbounded;         use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 with GNAT.Calendar.Time_IO;         use GNAT.Calendar.Time_IO;
-with Ada.Text_IO;                   use Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO;      use Ada.Text_IO.Unbounded_IO;
 
 package body Properties is
@@ -276,7 +273,7 @@ package body Properties is
     -- @param comments Comments (if any)
     --
     procedure Store(props: in Properties; output: File_Type; comments: in String := "") is
-        now:  Time := Clock;
+        now:  constant Time := Clock;
         curs: Hash_Table.Cursor;
         key:  Unbounded_String;
     begin
@@ -317,7 +314,6 @@ package body Properties is
     -- @param comments Comments (if any)
     --
     procedure Store_To_XML(props: Properties; output: File_Type; comments: in String := "") is
-        now:  Time := Clock;
         curs: Hash_Table.Cursor;
         key:  Unbounded_String;
     begin
