@@ -48,7 +48,7 @@ package Logging.Level is
     INT_ALL   : constant Integer := Integer'Last;
 
     --
-    --
+    -- Class that describes a unique logging level.
     --
     type Level is tagged record
         intLevel : Integer;

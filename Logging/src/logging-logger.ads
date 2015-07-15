@@ -34,26 +34,61 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Logging.Level; use Logging.Level;
+with Logging.Level;         use Logging.Level;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Calendar;          use Ada.Calendar;
 
 package Logging.Logger is
 
     --
+    -- Class that describes a logging event
     --
+    type Log_Event is tagged record
+        Message     : Unbounded_String;
+        File_Name   : Unbounded_String;
+        Line_Number : Integer;
+        Method_Name : Unbounded_String;
+        Timestamp   : Time;
+        Priority    : Level.Level;
+    end record;
+
+    --
+    --
+    --
+    function New_Log_Event(Message     : in String;
+                           File_Name   : in String := "";
+                           Line_Number : in Natural := 0) return Log_Event;
+
+    --
+    --
+    --
+    function Format(Pattern: in String; Event: in Log_Event) return String;
+
+    --
+    -- Class the describes a protected logger instance.
     --
     protected type Logger is
 
         procedure Set_Level(L: in Level.Level);
         procedure Set_Pattern(S: in String);
+        function Get_Pattern return String;
 
         procedure Log(L: in Level.Level; S: in String);
+        procedure Log(L: in Level.Level; Event: in out Log_Event);
+
         procedure Fatal(S: in String);
         procedure Error(S: in String);
-        procedure Warn(S: in String);
-        procedure Info(S: in String);
+        procedure Warn (S: in String);
+        procedure Info (S: in String);
         procedure Debug(S: in String);
         procedure Trace(S: in String);
+
+        procedure Fatal(E: in out Log_Event);
+        procedure Error(E: in out Log_Event);
+        procedure Warn (E: in out Log_Event);
+        procedure Info (E: in out Log_Event);
+        procedure Debug(E: in out Log_Event);
+        procedure Trace(E: in out Log_Event);
 
     private
         Min_Level: Level.Level := Level.WARN;
@@ -63,6 +98,9 @@ package Logging.Logger is
 
     type Logger_Ptr is access all Logger;
 
+    --
+    --
+    --
     function Get_Logger(S: in String) return Logger_Ptr;
 
 end Logging.Logger;
