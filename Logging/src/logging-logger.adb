@@ -1,5 +1,5 @@
--- @(#)File:            logging.adb
--- @(#)Last changed:    May 27 2015 10:30:00
+-- @(#)File:            logging-logger.adb
+-- @(#)Last changed:    June 12 2015 13:50:00
 -- @(#)Purpose:         Application and system logging
 -- @(#)Author:          Marc Bejerano <marcbejerano@gmail.com>
 -- @(#)Copyright:       Copyright (C) 2015, Marc Bejerano, All Rights Reserved
@@ -34,6 +34,66 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package Logging is
+with Ada.Text_IO;           use Ada.Text_IO;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-end Logging;
+package body Logging.Logger is
+
+    protected body Logger is
+
+        procedure Set_Level(L: in Level.Level) is
+        begin
+            Min_Level := L;
+        end Set_Level;
+
+        procedure Set_Pattern(S: in String) is
+        begin
+            Pattern := To_Unbounded_String(S);
+        end Set_Pattern;
+
+        procedure Log(L: in Level.Level; S: in String) is
+        begin
+            if L <= Min_Level then
+        		Put_Line(S);
+            end if;
+        end log;
+
+    	procedure Fatal(S: in String) is
+    	begin
+            Log(Level.FATAL, S);
+    	end Fatal;
+
+    	procedure Error(S: in String) is
+    	begin
+            Log(Level.ERROR, S);
+    	end Error;
+
+    	procedure Warn(S: in String) is
+    	begin
+            Log(Level.WARN, S);
+    	end Warn;
+
+    	procedure Info(S: in String) is
+    	begin
+            Log(Level.INFO, S);
+    	end Info;
+
+    	procedure Debug(S: in String) is
+    	begin
+            Log(Level.DEBUG, S);
+    	end Debug;
+
+    	procedure Trace(S: in String) is
+    	begin
+            Log(Level.TRACE, S);
+    	end Trace;
+    end Logger;
+
+    function Get_Logger(S: in String) return Logger_Ptr is
+        aLogger: Logger_Ptr := null;
+    begin
+        aLogger := new Logger;
+        return aLogger;
+    end Get_Logger;
+
+end Logging.Logger;

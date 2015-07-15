@@ -1,5 +1,5 @@
--- @(#)File:            logging.adb
--- @(#)Last changed:    May 27 2015 10:30:00
+-- @(#)File:            logging-level.ads
+-- @(#)Last changed:    Jun 2 2015 09:37:00
 -- @(#)Purpose:         Application and system logging
 -- @(#)Author:          Marc Bejerano <marcbejerano@gmail.com>
 -- @(#)Copyright:       Copyright (C) 2015, Marc Bejerano, All Rights Reserved
@@ -34,6 +34,11 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package Logging is
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-end Logging;
+package Logging.Pattern_Layout is
+
+    function Format(Pattern: in String; 
+
+end Logging.Pattern_Layout;
+

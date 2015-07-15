@@ -58,6 +58,9 @@ package Logging.Level is
     function "=" (aLevel: in Level; bLevel: in Level) return Boolean;
     function ">" (aLevel: in Level; bLevel: in Level) return Boolean;
     function "<" (aLevel: in Level; bLevel: in Level) return Boolean;
+    function ">=" (aLevel: in Level; bLevel: in Level) return Boolean;
+    function "<=" (aLevel: in Level; bLevel: in Level) return Boolean;
+
     function Is_Less_Specific_Than(aLevel: in Level; aCompareLevel: in Level) return Boolean;
     function Is_More_Specific_Than(aLevel: in Level; aCompareLevel: in Level) return Boolean;
     function To_Level(aName: in String) return Level;

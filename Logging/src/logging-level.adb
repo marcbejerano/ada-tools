@@ -54,6 +54,16 @@ package body Logging.Level is
         return aLevel.intLevel < bLevel.intLevel;
     end "<";
 
+    function ">=" (aLevel: in Level; bLevel: in Level) return Boolean is
+    begin
+        return aLevel > bLevel or aLevel = bLevel;
+    end ">=";
+
+    function "<=" (aLevel: in Level; bLevel: in Level) return Boolean is
+    begin
+        return aLevel < bLevel or aLevel = bLevel;
+    end "<=";
+
     function Is_Less_Specific_Than(aLevel: in Level; aCompareLevel: in Level) return Boolean is
     begin
         return aLevel > aCompareLevel;

@@ -1,5 +1,5 @@
--- @(#)File:            logging.adb
--- @(#)Last changed:    May 27 2015 10:30:00
+-- @(#)File:            logging-logger.ads
+-- @(#)Last changed:    June 12 2015 13:50:00
 -- @(#)Purpose:         Application and system logging
 -- @(#)Author:          Marc Bejerano <marcbejerano@gmail.com>
 -- @(#)Copyright:       Copyright (C) 2015, Marc Bejerano, All Rights Reserved
@@ -34,6 +34,36 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package Logging is
+with Logging.Level; use Logging.Level;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-end Logging;
+package Logging.Logger is
+
+    --
+    --
+    --
+    protected type Logger is
+
+        procedure Set_Level(L: in Level.Level);
+        procedure Set_Pattern(S: in String);
+
+        procedure Log(L: in Level.Level; S: in String);
+        procedure Fatal(S: in String);
+        procedure Error(S: in String);
+        procedure Warn(S: in String);
+        procedure Info(S: in String);
+        procedure Debug(S: in String);
+        procedure Trace(S: in String);
+
+    private
+        Min_Level: Level.Level := Level.WARN;
+        Pattern: Unbounded_String := To_Unbounded_String("%-5p [%t]: %m%n");
+
+    end Logger;
+
+    type Logger_Ptr is access all Logger;
+
+    function Get_Logger(S: in String) return Logger_Ptr;
+
+end Logging.Logger;
+
