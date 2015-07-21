@@ -1,6 +1,7 @@
 with Logging.Logger;        use Logging.Logger;
 with Logging.Appender;      use Logging.Appender;
 with Logging.Level;         use Logging.Level;
+with Logging.Event;         use Logging.Event;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with GNAT.Source_Info;
 

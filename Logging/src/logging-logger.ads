@@ -38,34 +38,9 @@ with Ada.Calendar;          use Ada.Calendar;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Logging.Appender;      use Logging.Appender;
 with Logging.Level;         use Logging.Level;
+with Logging.Event;         use Logging.Event;
 
 package Logging.Logger is
-
-    --
-    -- Class that describes a logging event
-    --
-    type Log_Event is tagged record
-        Message     : Unbounded_String;
-        File_Name   : Unbounded_String;
-        Line_Number : Integer;
-        Entity      : Unbounded_String;
-        Timestamp   : Time;
-        Priority    : Level.Level;
-    end record;
-
-    --
-    -- Create a new logging event object given all of the required parameters. The 
-    -- Timestamp will be automatically set upon calling this function.
-    -- @param Message Logging event message
-    -- @param File_Name Filename where the logging event occurred
-    -- @param Line_Number Line number where the logging event occurred
-    -- @param Entity Enclosing entity where the logging event occurred
-    -- @return A new Log_Event object
-    --
-    function New_Log_Event(Message     : in String;
-                           File_Name   : in String := "";
-                           Line_Number : in Natural := 0;
-                           Entity      : in String := "") return Log_Event;
 
     --
     -- Format the given Log_Event according to the pattern defined by the Pattern

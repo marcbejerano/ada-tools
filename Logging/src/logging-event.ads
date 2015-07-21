@@ -1,5 +1,5 @@
--- @(#)File:            logging-appender.ads
--- @(#)Last changed:    Jul 21 2015 13:08:00
+-- @(#)File:            logging-logevent.ads
+-- @(#)Last changed:    July 21 2015 14:51:00
 -- @(#)Purpose:         Application and system logging
 -- @(#)Author:          Marc Bejerano <marcbejerano@gmail.com>
 -- @(#)Copyright:       Copyright (C) 2015, Marc Bejerano, All Rights Reserved
@@ -34,61 +34,37 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
-with Ada.Containers.Vectors;    use Ada.Containers;
+with Ada.Calendar;          use Ada.Calendar;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Logging.Level;         use Logging.Level;
 
-package Logging.Appender is
-
-    --
-    -- Base appender object
-    --
-    type Appender is tagged null record;
+package Logging.Event is
 
     --
-    -- Output the given string top the File_Appender. This being the
-    -- base Appender Put() function ... it does nothing. Just a stub.
-    -- @param aAppender Appender to write to
-    -- @param aEvent Event to log
+    -- Class that describes a logging event
     --
-    procedure Put(aAppender: in Appender; aString: in String);
-
-    --
-    -- Console appender object. All output goes to the console
-    --
-    type Console_Appender is new Appender with null record;
-
-    --
-    -- Output the given string top the File_Appender
-    -- @param aAppender Appender to write to
-    -- @param aEvent Event to log
-    --
-    procedure Put(aAppender: in Console_Appender; aString: in String);
-
-    --
-    -- File appender object. All output is appended to the named file.
-    --
-    type File_Appender is new Appender with record
-        File_Name: Unbounded_String;
+    type Log_Event is tagged record
+        Message     : Unbounded_String;
+        File_Name   : Unbounded_String;
+        Line_Number : Integer;
+        Entity      : Unbounded_String;
+        Timestamp   : Time;
+        Priority    : Level.Level;
     end record;
 
     --
-    -- Output the given string top the File_Appender
-    -- @param aAppender Appender to write to
-    -- @param aEvent Event to log
+    -- Create a new logging event object given all of the required parameters. The 
+    -- Timestamp will be automatically set upon calling this function.
+    -- @param Message Logging event message
+    -- @param File_Name Filename where the logging event occurred
+    -- @param Line_Number Line number where the logging event occurred
+    -- @param Entity Enclosing entity where the logging event occurred
+    -- @return A new Log_Event object
     --
-    procedure Put(aAppender: in File_Appender; aString: in String);
+    function New_Log_Event(Message     : in String;
+                           File_Name   : in String := "";
+                           Line_Number : in Natural := 0;
+                           Entity      : in String := "") return Log_Event;
 
-    --
-    -- Pointer to an object of class Appender
-    --
-    type Appender_Class_Ptr is access all Appender'Class;
-
-    --
-    -- Aliased vector container of Appenders
-    --
-    package Appender_Vectors is new Ada.Containers.Vectors(
-        Element_Type => Appender_Class_Ptr,
-        Index_Type   => Positive);
-
-end Logging.Appender;
+end Logging.Event;
 
