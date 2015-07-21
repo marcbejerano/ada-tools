@@ -1,5 +1,6 @@
-with Logging.Logger; use Logging.Logger;
-with Logging.Level;  use Logging.Level;
+with Logging.Logger;   use Logging.Logger;
+with Logging.Level;    use Logging.Level;
+with GNAT.Source_Info;
 
 procedure LoggerTest is
 
@@ -9,7 +10,7 @@ procedure LoggerTest is
 begin
     myLogger.Set_Level(INFO);
     --myLogger.Get_Handlers()
-    myLogger.Set_Pattern("%d{ISO8601} [%-5p] %F:%-4L %m%n");
+    -- myLogger.Set_Pattern("%d{ISO8601} [%-5p] %F:%-4L (%M) %m%n");
     
     myLogger.trace("TRACE woot!");
     myLogger.debug("DEBUG woot!");
@@ -18,8 +19,6 @@ begin
     myLogger.error("ERROR woot!");
     myLogger.fatal("FATAL woot!");
 
-    myEvent := New_Log_Event("This is a message", "loggertest.adb", 20);
-
-    myLogger.error(myEvent);
+    myLogger.error(New_Log_Event("Error Message", GNAT.Source_Info.File, GNAT.Source_Info.Line, GNAT.Source_Info.Enclosing_Entity));
 end LoggerTest;
 
