@@ -5,12 +5,10 @@ with GNAT.Source_Info;
 procedure LoggerTest is
 
     myLogger : Logger_Ptr := Get_Logger("LoggerTest");
-    myEvent  : Log_Event;
 
 begin
-    myLogger.Set_Level(INFO);
+    myLogger.Set_Level(TRACE);
     --myLogger.Get_Handlers()
-    -- myLogger.Set_Pattern("%d{ISO8601} [%-5p] %F:%-4L (%M) %m%n");
     
     myLogger.trace("TRACE woot!");
     myLogger.debug("DEBUG woot!");
@@ -19,6 +17,7 @@ begin
     myLogger.error("ERROR woot!");
     myLogger.fatal("FATAL woot!");
 
-    myLogger.error(New_Log_Event("Error Message", GNAT.Source_Info.File, GNAT.Source_Info.Line, GNAT.Source_Info.Enclosing_Entity));
+    myLogger.Set_Pattern("%d{ISO8601} [%-5p] %F:[%-4L] %m%n");
+    myLogger.error(New_Log_Event("Error Message", GNAT.Source_Info.File, GNAT.Source_Info.Line));
 end LoggerTest;
 
