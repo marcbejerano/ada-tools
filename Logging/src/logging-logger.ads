@@ -34,9 +34,10 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Logging.Level;         use Logging.Level;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Calendar;          use Ada.Calendar;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Logging.Appender;      use Logging.Appender;
+with Logging.Level;         use Logging.Level;
 
 package Logging.Logger is
 
@@ -188,6 +189,12 @@ package Logging.Logger is
         function Get_Pattern return String;
 
         --
+        -- Add an output appender to this logger
+        -- @param aAppender An appender
+        --
+        procedure Add_Appender(aAppender: in Appender.Appender_Class_Ptr);
+
+        --
         -- Send the given log message with the specified priority to the logger's
         -- output handlers. If the specified priority is below the current minimum
         -- threshold then the message will be ignored.
@@ -196,6 +203,13 @@ package Logging.Logger is
         --
         procedure Log(aLevel: in Level.Level; aMessage: in String);
 
+        --
+        -- Send the given Log_Event with the specified priority to the logger's
+        -- output handlers. If the specified priority is below the current minimum
+        -- threshold then the Log_Event will be ignored.
+        -- @param aLevel Priority level of the given message
+        -- @param aEvent Log_Event to send to the logger
+        --
         procedure Log(aLevel: in Level.Level; aEvent: in Log_Event);
 
         --
@@ -225,6 +239,7 @@ package Logging.Logger is
     private
         Min_Priority_Level: Level.Level := Level.WARN;
         Pattern: Unbounded_String := To_Unbounded_String("%d{ISO8601} [%-5p] %m%n");
+        Appenders: Appender_Vectors.Vector;
 
     end Logger;
 

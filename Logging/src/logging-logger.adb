@@ -34,16 +34,19 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Ada.Text_IO;           use Ada.Text_IO;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Calendar;          use Ada.Calendar;
-with GNAT.Calendar.Time_IO; use GNAT.Calendar.Time_IO;
+with Ada.Calendar;              use Ada.Calendar;
+With Ada.Containers.Vectors;    use Ada.Containers;
+with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
+with Ada.Text_IO;               use Ada.Text_IO;
+with GNAT.Calendar.Time_IO;     use GNAT.Calendar.Time_IO;
 
 package body Logging.Logger is
 
     ISO8601_FORMAT  : constant Picture_String := "%Y-%m-%d %H:%M:%S,%i";
     ABSOLUTE_FORMAT : constant Picture_String := "%H:%M:%S,%i";
     DATE_FORMAT     : constant Picture_String := "%d %b %Y %H:%M:%S,%i";
+
+    Console         : Console_Appender;
 
     --
     -- Create a new logging event object given all of the required parameters. The 
@@ -348,6 +351,15 @@ package body Logging.Logger is
         end Get_Pattern;
 
         --
+        -- Add an output appender to this logger
+        -- @param aAppender An appender
+        --
+        procedure Add_Appender(aAppender: in Appender.Appender_Class_Ptr) is
+        begin
+            Appenders.Append(aAppender);
+        end Add_Appender;
+
+        --
         -- Send the given log message with the specified priority to the logger's
         -- output handlers. If the specified priority is below the current minimum
         -- threshold then the message will be ignored.
@@ -364,7 +376,21 @@ package body Logging.Logger is
                 event.Priority := aLevel;
                 event.Message := To_Unbounded_String(aMessage);
                 event.Timestamp := Clock;
-                Put(Format(To_String(Pattern), event));
+
+                if Appenders.Is_Empty then
+                    Put(Console, Format(To_String(Pattern), event));
+                else
+                    declare
+                        aCursor: Appender_Vectors.Cursor := Appenders.First;
+                        aAppender: Appender_Class_Ptr;
+                    begin
+                        while Appender_Vectors.Has_Element(aCursor) loop
+                            aAppender := Appender_Vectors.Element(aCursor);
+                            aAppender.Put(Format(To_String(Pattern), event));
+                            aCursor := Appender_Vectors.Next(aCursor);
+                        end loop;
+                    end;
+                end if;
             end if;
         end log;
         
