@@ -1,0 +1,38 @@
+with "../libAdaLogging.gpr";
+
+project LoggerTest is
+
+   type Mode_Type is
+      ("debug", "release");
+   Mode : Mode_Type := external ("mode", "release");
+
+   package Ide is
+      for Vcs_Kind use "Git";
+   end Ide;
+
+   package Builder is
+      for Default_Switches ("ada") use ("-j4", "-we");
+   end Builder;
+
+   package Compiler is
+
+      case Mode is
+
+         when "debug" =>
+            for Default_Switches ("ada") use ("-gnatwa", "-g", "-Werror", "-gnatn", "-gnat12");
+
+         when "release" =>
+            for Default_Switches ("ada") use ("-gnatwa", "-O3", "-Werror", "-gnatn", "-gnat12");
+      end case;
+   end Compiler;
+
+   case Mode is
+
+      when "debug" =>
+
+      when "release" =>
+         for Main use ("loggertest.adb");
+   end case;
+
+end LoggerTest;
+

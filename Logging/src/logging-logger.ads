@@ -34,7 +34,6 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Ada.Calendar;          use Ada.Calendar;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Logging.Appender;      use Logging.Appender;
 with Logging.Level;         use Logging.Level;
@@ -97,7 +96,7 @@ package Logging.Logger is
     -- |            | date format specifier is given then ISO8601 format is   |
     -- |            | assumed.                                                |
     -- |            |                                                         |
-    -- |            | See the Ada package GNAT.CAlendar.Time_IO               |
+    -- |            | See the Ada package GNAT.Calendar.Time_IO               |
     -- |            |                                                         |
     -- |            | For better results it is recommended to use one of the  |
     -- |            | strings "ABSOLUTE", "DATE" and "ISO8601".               |
@@ -226,6 +225,13 @@ package Logging.Logger is
     -- @return Logger object
     --
     function Get_Logger(aLoggerName: in String) return Logger_Ptr;
+
+    --
+    -- Initialize the logging system with settings from the given 
+    -- properties file.
+    -- @param aFile_Name Name of the properties file
+    --
+    procedure Init_Logging(aFile_Name: in String);
 
 end Logging.Logger;
 

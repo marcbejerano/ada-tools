@@ -36,6 +36,7 @@
 
 with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
 with Ada.Containers.Vectors;    use Ada.Containers;
+with Logging.Event;             use Logging.Event;
 
 package Logging.Appender is
 
@@ -49,8 +50,9 @@ package Logging.Appender is
     -- base Appender Put() function ... it does nothing. Just a stub.
     -- @param aAppender Appender to write to
     -- @param aEvent Event to log
+    -- @param aString MEssage to log
     --
-    procedure Put(aAppender: in Appender; aString: in String);
+    procedure Put(aAppender: in Appender; aEvent: in Log_Event; aString: in String);
 
     --
     -- Console appender object. All output goes to the console
@@ -61,8 +63,9 @@ package Logging.Appender is
     -- Output the given string top the File_Appender
     -- @param aAppender Appender to write to
     -- @param aEvent Event to log
+    -- @param aString MEssage to log
     --
-    procedure Put(aAppender: in Console_Appender; aString: in String);
+    procedure Put(aAppender: in Console_Appender; aEvent: in Log_Event; aString: in String);
 
     --
     -- File appender object. All output is appended to the named file.
@@ -75,8 +78,9 @@ package Logging.Appender is
     -- Output the given string top the File_Appender
     -- @param aAppender Appender to write to
     -- @param aEvent Event to log
+    -- @param aString MEssage to log
     --
-    procedure Put(aAppender: in File_Appender; aString: in String);
+    procedure Put(aAppender: in File_Appender; aEvent: in Log_Event; aString: in String);
 
     --
     -- Pointer to an object of class Appender

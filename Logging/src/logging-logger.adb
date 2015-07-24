@@ -35,9 +35,6 @@
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 with Ada.Calendar;              use Ada.Calendar;
-With Ada.Containers.Vectors;    use Ada.Containers;
-with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
-with Ada.Text_IO;               use Ada.Text_IO;
 with GNAT.Calendar.Time_IO;     use GNAT.Calendar.Time_IO;
 
 package body Logging.Logger is
@@ -135,7 +132,7 @@ package body Logging.Logger is
     -- |            | date format specifier is given then ISO8601 format is   |
     -- |            | assumed.                                                |
     -- |            |                                                         |
-    -- |            | See the Ada package GNAT.CAlendar.Time_IO               |
+    -- |            | See the Ada package GNAT.Calendar.Time_IO               |
     -- |            |                                                         |
     -- |            | For better results it is recommended to use one of the  |
     -- |            | strings "ABSOLUTE", "DATE" and "ISO8601".               |
@@ -268,7 +265,7 @@ package body Logging.Logger is
                                 Append(s, Trim_and_Pad(width, max_width, left_just, To_String(aEvent.Entity)));
                             end if;
                         when 'n' =>
-                            Append(s, ASCII.CR & ASCII.LF);
+                            Append(s, ASCII.LF);
                         when 'p' => null;
                             Append(s, Trim_and_Pad(width, max_width, left_just, To_String(aEvent.Priority)));
                         when 'r' => null;
@@ -351,7 +348,7 @@ package body Logging.Logger is
                 event.Timestamp := Clock;
 
                 if Appenders.Is_Empty then
-                    Put(Console, Format(To_String(Pattern), event));
+                    Put(Console, event, Format(To_String(Pattern), event));
                 else
                     declare
                         aCursor: Appender_Vectors.Cursor := Appenders.First;
@@ -359,7 +356,7 @@ package body Logging.Logger is
                     begin
                         while Appender_Vectors.Has_Element(aCursor) loop
                             aAppender := Appender_Vectors.Element(aCursor);
-                            aAppender.Put(Format(To_String(Pattern), event));
+                            aAppender.Put(event, Format(To_String(Pattern), event));
                             aCursor := Appender_Vectors.Next(aCursor);
                         end loop;
                     end;
@@ -379,7 +376,21 @@ package body Logging.Logger is
         begin
             if aLevel <= Min_Priority_Level then
                 tmpEvent.Priority := aLevel;
-                Put(Format(To_String(Pattern), tmpEvent));
+
+                if Appenders.Is_Empty then
+                    Put(Console, tmpEvent, Format(To_String(Pattern), tmpEvent));
+                else
+                    declare
+                        aCursor: Appender_Vectors.Cursor := Appenders.First;
+                        aAppender: Appender_Class_Ptr;
+                    begin
+                        while Appender_Vectors.Has_Element(aCursor) loop
+                            aAppender := Appender_Vectors.Element(aCursor);
+                            aAppender.Put(tmpEvent, Format(To_String(Pattern), tmpEvent));
+                            aCursor := Appender_Vectors.Next(aCursor);
+                        end loop;
+                    end;
+                end if;
             end if;
         end log;
 
@@ -414,10 +425,21 @@ package body Logging.Logger is
     -- @return Logger object
     --
     function Get_Logger(aLoggerName: in String) return Logger_Ptr is
+      pragma Unreferenced (aLoggerName);
         aLogger: Logger_Ptr := null;
     begin
         aLogger := new Logger;
         return aLogger;
     end Get_Logger;
+
+    --
+    -- Initialize the logging system with settings from the given 
+    -- properties file.
+    -- @param aFile_Name Name of the properties file
+    --
+    procedure Init_Logging(aFile_Name: in String) is
+    begin
+        null;
+    end Init_Logging;
 
 end Logging.Logger;

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<messages >
+  <project>
+    <vfs_file>/home/marcb/Projects/ada-tools/Logging/test/LoggerTest.gpr</vfs_file>
+    <category name="Builder results" >
+      <file>
+        <vfs_name>/home/marcb/Projects/ada-tools/Logging/test/loggertest.adb</vfs_name>
+        <message text="warning: &quot;myLogger&quot; is not modified, could be declared constant" weight="1" highlighting_style="Builder warnings/Builder results" column="5" line="10" class="GPS.KERNEL.MESSAGES.SIMPLE.SIMPLE_MESSAGE"  />
+      </file>
+      <file>
+        <vfs_name>/home/marcb/Projects/ada-tools/Logging/src/logging-logger.adb</vfs_name>
+        <message text="warning: formal parameter &quot;aLoggerName&quot; is not referenced" weight="1" highlighting_style="Builder warnings/Builder results" column="25" line="427" class="GPS.KERNEL.MESSAGES.SIMPLE.SIMPLE_MESSAGE"  />
+      </file>
+    </category>
+  </project>
+</messages>

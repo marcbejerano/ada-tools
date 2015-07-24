@@ -1,9 +1,26 @@
-project LibAdaLogging is
-   for Library_Name use "adalogging-0.1";
-   for Library_Kind use "static";
-   for Object_Dir use "src";
-   for Source_Dirs use ("src");
+with "../Properties/libAdaProperties.gpr";
 
+project LibAdaLogging is
+
+   for Source_Dirs use ("src/**");
+   for Library_Name use "AdaLogging";
+   for Library_Kind use "dynamic";
+   for Library_Version use "libAdaLogging-0.0.1.so";
+   for Library_Dir use "lib/";
+   for Library_Ali_Dir use "lib/";
+
+   package Ide is
+      for Vcs_Kind use "Git";
+   end Ide;
+
+   package Gnattest is
+      for Tests_Dir use "test";
+   end Gnattest;
+
+   package Binder is
+      for Default_Switches ("ada") use ("-shared");
+   end Binder;
+   
    type Mode_Type is ("debug", "release");
    Mode : Mode_Type := external ("mode", "release");
 

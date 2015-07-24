@@ -34,10 +34,6 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Ada.Calendar;          use Ada.Calendar;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Logging.Level;         use Logging.Level;
-
 package body Logging.Event is
 
     --

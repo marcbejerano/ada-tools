@@ -34,17 +34,19 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Fixed;     use Ada.Strings.Fixed;
 with Ada.Text_IO;           use Ada.Text_IO;
+with Logging.Level;         use Logging.Level;
 
 package body Logging.Appender is
 
     --
     -- Output the given string top the File_Appender
     -- @param aAppender Appender to write to
+    -- @param aEvent Event to log
     -- @param aString String to write
     --
-    procedure Put(aAppender: in Appender; aString: in String) is
+    procedure Put(aAppender: in Appender; aEvent: in Log_Event; aString: in String) is
     begin
         null;
     end Put;
@@ -52,28 +54,34 @@ package body Logging.Appender is
     --
     -- Output the given string top the File_Appender
     -- @param aAppender Appender to write to
+    -- @param aEvent Event to log
     -- @param aString String to write
     --
-    procedure Put(aAppender: in Console_Appender; aString: in String) is
+    procedure Put(aAppender: in Console_Appender; aEvent: in Log_Event; aString: in String) is
     begin
-        Put(aString);
+        if aEvent.Priority = INFO then
+            Put(Standard_Output, aString);
+        else
+            Put(Standard_Error, aString);
+        end if;
     end Put;
 
     --
     -- Output the given string top the File_Appender
     -- @param aAppender Appender to write to
+    -- @param aEvent Event to log
     -- @param aString String to write
     --
-    procedure Put(aAppender: in File_Appender; aString: in String) is
+    procedure Put(aAppender: in File_Appender; aEvent: in Log_Event; aString: in String) is
         aFile: File_Type;
     begin
         Open(aFile, Append_File, To_String(aAppender.File_Name));
-        Put(aFile, aString);
+        Put(aFile, Trim(aString, Ada.Strings.Right));
         Close(aFile);
     exception
         when Name_Error =>
             Create(aFile, Out_File, To_String(aAppender.File_Name));
-            Put(aFile, aString);
+            Put(aFile, Trim(aString, Ada.Strings.Right));
             Close(aFile);
     end Put;
 
