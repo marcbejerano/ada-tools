@@ -43,7 +43,22 @@ package Logging.Appender is
     --
     -- Base appender object
     --
-    type Appender is tagged null record;
+    type Appender is tagged record
+        Pattern : Unbounded_String := To_Unbounded_String("%d{ISO8601} [%-5p] %m%n");
+    end record;
+
+    --
+    -- Set the logger output format pattern for all log messages. See Format()
+    -- for formatting conversion codes.
+    -- @param aPattern Message output pattern
+    --
+    procedure Set_Pattern(aAppender: in out Appender; aPattern: in String);
+    
+    --
+    -- Return the current message formatting pattern.
+    -- @return Formatting pattern
+    --
+    function Get_Pattern(aAppender: in Appender) return String;
 
     --
     -- Output the given string top the File_Appender. This being the
@@ -52,12 +67,13 @@ package Logging.Appender is
     -- @param aEvent Event to log
     -- @param aString MEssage to log
     --
-    procedure Put(aAppender: in Appender; aEvent: in Log_Event; aString: in String);
+    procedure Put(aAppender: in Appender; aEvent: in Log_Event);
 
     --
     -- Console appender object. All output goes to the console
     --
     type Console_Appender is new Appender with null record;
+    type Console_Appender_Ptr is access all Console_Appender;
 
     --
     -- Output the given string top the File_Appender
@@ -65,7 +81,7 @@ package Logging.Appender is
     -- @param aEvent Event to log
     -- @param aString MEssage to log
     --
-    procedure Put(aAppender: in Console_Appender; aEvent: in Log_Event; aString: in String);
+    procedure Put(aAppender: in Console_Appender; aEvent: in Log_Event);
 
     --
     -- File appender object. All output is appended to the named file.
@@ -73,6 +89,7 @@ package Logging.Appender is
     type File_Appender is new Appender with record
         File_Name: Unbounded_String;
     end record;
+    type File_Appender_Ptr is access all File_Appender;
 
     --
     -- Output the given string top the File_Appender
@@ -80,7 +97,14 @@ package Logging.Appender is
     -- @param aEvent Event to log
     -- @param aString MEssage to log
     --
-    procedure Put(aAppender: in File_Appender; aEvent: in Log_Event; aString: in String);
+    procedure Put(aAppender: in File_Appender; aEvent: in Log_Event);
+
+    --
+    -- Set the file appender output filename
+    -- @param aAppender Appender to update
+    -- @param aFileName Name of file
+    --
+    procedure Set_File_Name(aAppender: in out File_Appender; aFileName: in String);
 
     --
     -- Pointer to an object of class Appender

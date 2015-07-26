@@ -1,14 +1,224 @@
-2015-07-24 08:29:55,381 [TRACE] TRACE woot!
+2015-07-24 10:15:52,026 [TRACE] :[] TRACE woot!
 
-2015-07-24 08:29:55,381 [DEBUG] DEBUG woot!
+2015-07-24 10:15:52,026 [DEBUG] :[] DEBUG woot!
 
-2015-07-24 08:29:55,381 [INFO ] INFO  woot!
+2015-07-24 10:15:52,027 [INFO ] :[] INFO  woot!
 
-2015-07-24 08:29:55,381 [WARN ] WARN  woot!
+2015-07-24 10:15:52,027 [WARN ] :[] WARN  woot!
 
-2015-07-24 08:29:55,381 [ERROR] ERROR woot!
+2015-07-24 10:15:52,027 [ERROR] :[] ERROR woot!
 
-2015-07-24 08:29:55,381 [FATAL] FATAL woot!
+2015-07-24 10:15:52,027 [FATAL] :[] FATAL woot!
 
-2015-07-24 08:29:55,382 [ERROR] loggertest.adb:[ 25 ] Error Message
+2015-07-24 10:15:52,027 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 10:17:22,997 [TRACE] :[] TRACE woot!
+
+2015-07-24 10:17:22,997 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 10:17:22,998 [INFO ] :[] INFO  woot!
+
+2015-07-24 10:17:22,998 [WARN ] :[] WARN  woot!
+
+2015-07-24 10:17:22,998 [ERROR] :[] ERROR woot!
+
+2015-07-24 10:17:22,998 [FATAL] :[] FATAL woot!
+
+2015-07-24 10:17:22,998 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 10:17:44,494 [TRACE] :[] TRACE woot!
+
+2015-07-24 10:17:44,494 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 10:17:44,495 [INFO ] :[] INFO  woot!
+
+2015-07-24 10:17:44,495 [WARN ] :[] WARN  woot!
+
+2015-07-24 10:17:44,495 [ERROR] :[] ERROR woot!
+
+2015-07-24 10:17:44,495 [FATAL] :[] FATAL woot!
+
+2015-07-24 10:17:44,495 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 11:54:29,109 [TRACE] :[] TRACE woot!
+
+2015-07-24 11:54:29,109 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 11:54:29,109 [INFO ] :[] INFO  woot!
+
+2015-07-24 11:54:29,109 [WARN ] :[] WARN  woot!
+
+2015-07-24 11:54:29,109 [ERROR] :[] ERROR woot!
+
+2015-07-24 11:54:29,109 [FATAL] :[] FATAL woot!
+
+2015-07-24 11:54:29,109 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 13:18:29,256 [TRACE] :[] TRACE woot!
+
+2015-07-24 13:18:29,256 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 13:18:29,256 [INFO ] :[] INFO  woot!
+
+2015-07-24 13:18:29,256 [WARN ] :[] WARN  woot!
+
+2015-07-24 13:18:29,256 [ERROR] :[] ERROR woot!
+
+2015-07-24 13:18:29,256 [FATAL] :[] FATAL woot!
+
+2015-07-24 13:18:29,256 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 14:59:49,185 [TRACE] :[] TRACE woot!
+
+2015-07-24 14:59:49,185 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 14:59:49,185 [INFO ] :[] INFO  woot!
+
+2015-07-24 14:59:49,185 [WARN ] :[] WARN  woot!
+
+2015-07-24 14:59:49,185 [ERROR] :[] ERROR woot!
+
+2015-07-24 14:59:49,185 [FATAL] :[] FATAL woot!
+
+2015-07-24 14:59:49,185 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:00:38,158 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:00:38,158 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:00:38,158 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:00:38,159 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:00:38,159 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:00:38,159 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:00:38,159 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:00:42,879 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:00:42,879 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:00:42,879 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:00:42,879 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:00:42,880 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:00:42,880 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:00:42,880 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:15:42,955 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:15:42,956 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:15:42,956 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:15:42,956 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:15:42,956 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:15:42,956 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:15:42,956 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:16:08,736 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:16:08,736 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:16:08,736 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:16:08,736 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:16:08,736 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:16:08,736 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:16:08,736 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:17:40,224 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:17:40,225 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:17:40,225 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:17:40,225 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:17:40,225 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:17:40,225 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:17:40,225 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:18:03,164 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:18:03,164 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:18:03,164 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:18:03,164 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:18:03,164 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:18:03,164 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:18:03,164 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-24 15:20:11,264 [TRACE] :[] TRACE woot!
+
+2015-07-24 15:20:11,264 [DEBUG] :[] DEBUG woot!
+
+2015-07-24 15:20:11,265 [INFO ] :[] INFO  woot!
+
+2015-07-24 15:20:11,265 [WARN ] :[] WARN  woot!
+
+2015-07-24 15:20:11,265 [ERROR] :[] ERROR woot!
+
+2015-07-24 15:20:11,265 [FATAL] :[] FATAL woot!
+
+2015-07-24 15:20:11,265 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-25 16:26:09,219 [TRACE] :[] TRACE woot!
+
+2015-07-25 16:26:09,219 [DEBUG] :[] DEBUG woot!
+
+2015-07-25 16:26:09,219 [INFO ] :[] INFO  woot!
+
+2015-07-25 16:26:09,219 [WARN ] :[] WARN  woot!
+
+2015-07-25 16:26:09,219 [ERROR] :[] ERROR woot!
+
+2015-07-25 16:26:09,220 [FATAL] :[] FATAL woot!
+
+2015-07-25 16:26:09,220 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-25 16:26:18,130 [TRACE] :[] TRACE woot!
+
+2015-07-25 16:26:18,131 [DEBUG] :[] DEBUG woot!
+
+2015-07-25 16:26:18,131 [INFO ] :[] INFO  woot!
+
+2015-07-25 16:26:18,131 [WARN ] :[] WARN  woot!
+
+2015-07-25 16:26:18,131 [ERROR] :[] ERROR woot!
+
+2015-07-25 16:26:18,131 [FATAL] :[] FATAL woot!
+
+2015-07-25 16:26:18,131 [ERROR] loggertest.adb:[ 33 ] Error Message
+
+2015-07-25 17:13:43,971 [TRACE] :[] TRACE woot!
+
+2015-07-25 17:13:43,971 [DEBUG] :[] DEBUG woot!
+
+2015-07-25 17:13:43,971 [INFO ] :[] INFO  woot!
+
+2015-07-25 17:13:43,972 [WARN ] :[] WARN  woot!
+
+2015-07-25 17:13:43,972 [ERROR] :[] ERROR woot!
+
+2015-07-25 17:13:43,972 [FATAL] :[] FATAL woot!
+
+2015-07-25 17:13:43,972 [ERROR] loggertest.adb:[ 33 ] Error Message
 

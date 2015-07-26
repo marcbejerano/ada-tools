@@ -34,257 +34,45 @@
 -- OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-with Ada.Calendar;              use Ada.Calendar;
-with GNAT.Calendar.Time_IO;     use GNAT.Calendar.Time_IO;
+with Ada.Calendar;                  use Ada.Calendar;
+with Ada.Containers.Hashed_Maps;    use Ada.Containers;
+with Ada.Strings.Fixed;             use Ada.Strings.Fixed;
+with Ada.Strings.Unbounded.Hash;
+with Properties;                    use Properties;
+
+with Ada.Text_IO;
 
 package body Logging.Logger is
 
-    ISO8601_FORMAT  : constant Picture_String := "%Y-%m-%d %H:%M:%S,%i";
-    ABSOLUTE_FORMAT : constant Picture_String := "%H:%M:%S,%i";
-    DATE_FORMAT     : constant Picture_String := "%d %b %Y %H:%M:%S,%i";
+    --
+    -- Hash the given key into a Hash object.
+    -- @param key Key to hash
+    -- @return Hash object
+    --
+    function Key_Hashed(key: in Unbounded_String) return Hash_Type is
+    begin
+        return Hash(key);
+    end Key_Hashed;
+   
+    package Logger_Table is new Ada.Containers.Hashed_Maps
+        (Key_Type        => Unbounded_String,
+         Element_Type    => Logger_Ptr,
+         Hash            => Key_Hashed,
+         Equivalent_Keys => "=");
+
+    use type Logger_Table.Cursor;
+
+    package Appender_Table is new Ada.Containers.Hashed_Maps
+        (Key_Type        => Unbounded_String,
+         Element_Type    => Appender.Appender_Class_Ptr,
+         Hash            => Key_Hashed,
+         Equivalent_Keys => "=");
+
+    use type Appender_Table.Cursor;
 
     Console         : Console_Appender;
-
-    --
-    -- Apply the trimming and/or padding to the given string based on justification,
-    -- width, and maximum width.
-    -- @param Width Width of the target string
-    -- @param Max_Width Maximum width of the allowed string (crop if Text is longer)
-    -- @param Left_Justify Justify the string left or right within Width
-    -- @param Text Text to trim/pad/justify
-    -- @return Modified text
-    --
-    function Trim_and_Pad(Width, Max_Width: in Integer; Left_Justify: in Boolean; Text : in String) return String is
-        t : Unbounded_String;
-        s : Unbounded_String;
-    begin
-        if (Length(t) > Max_Width) then
-            t := Unbounded_Slice(To_Unbounded_String(Text), 1, Max_Width);
-        else
-            t := To_Unbounded_String(Text);
-        end if;
-
-        if (Length(t) < Width) then
-            if (Left_Justify) then
-                s := Head(t, Width);
-            else
-                s := Tail(t, Width);
-            end if;
-        else
-            s := t;
-        end if;
-
-        return To_String(s);
-    end Trim_and_Pad;
-
-    --
-    -- Format the given Log_Event according to the pattern defined by the Pattern
-    -- argument. The Pattern formatting follows the same rules as the Log4J 1.2 API
-    -- formatting markers.
-    --
-    -- A flexible layout configurable with pattern string.  The goal of this function
-    -- is to format a Log_Event and return the results as a String. The results depend
-    -- on the conversion pattern.
-    --
-    -- The conversion pattern is closely related to the conversion pattern of the
-    -- printf function in C. A conversion pattern is composed of literal text and
-    -- format control expressions called conversion specifiers.
-    --
-    -- You are free to insert any literal text within the conversion pattern.
-    --
-    -- Each conversion specifier starts with a percent sign (%) and is followed by
-    -- optional format modifiers and a conversion character. The conversion character
-    -- specifies the type of data, e.g. category, priority, date, thread name. The
-    -- format modifiers control such things as field width, padding, left and right
-    -- justification. The following is a simple example.
-    --
-    -- Let the conversion pattern be "%-5p [%t]: %m%n" and assume that the logging
-    -- environment was set to use a Pattern. Then the statements
-    --
-    --   Logger root = Get_Logger("foo");
-    --   root.debug("Message 1");
-    --   root.warn("Message 2");
-    --
-    -- would yield the output
-    --
-    --   DEBUG [main]: Message 1
-    --   WARN  [main]: Message 2
-    --                     
-    -- Note that there is no explicit separator between text and conversion 
-    -- specifiers. The pattern parser knows when it has reached the end of a
-    -- conversion specifier when it reads a conversion character. In the
-    -- example above the conversion specifier %-5p means the priority of the
-    -- logging event should be left justified to a width of five characters.
-    -- The recognized conversion characters are:
-    --
-    -- +------------+---------------------------------------------------------+
-    -- | Conversion |                                                         |
-    -- |  Character |                        Effect                           |
-    -- +------------+---------------------------------------------------------+
-    -- |     c      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     C      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     d      | Used to output the date of the logging event. The date  |
-    -- |            | conversion specifier may be followed by a date format   |
-    -- |            | specifier enclosed between braces. For example,         |
-    -- |            | %d{HH:mm:ss,SSS} or %d{dd MMM yyyy HH:mm:ss,SSS}. If no |
-    -- |            | date format specifier is given then ISO8601 format is   |
-    -- |            | assumed.                                                |
-    -- |            |                                                         |
-    -- |            | See the Ada package GNAT.Calendar.Time_IO               |
-    -- |            |                                                         |
-    -- |            | For better results it is recommended to use one of the  |
-    -- |            | strings "ABSOLUTE", "DATE" and "ISO8601".               |
-    -- +------------+---------------------------------------------------------+
-    -- |     F      | Used to output the file name where the logging request  |
-    -- |            | was issued.                                             |
-    -- +------------+---------------------------------------------------------+
-    -- |     l      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     L      | Used to output the line number from where the logging   |
-    -- |            | request was issued.                                     |
-    -- +------------+---------------------------------------------------------+
-    -- |     m      | Used to output the application supplied message         |
-    -- |            | associated with the logging event.                      |
-    -- +------------+---------------------------------------------------------+
-    -- |     M      | Used to output the method (enclosing entity) name where |
-    -- |            | the logging request was issued.                         |
-    -- +------------+---------------------------------------------------------+
-    -- |     n      | Outputs the line separator strings "\n"                 |
-    -- +------------+---------------------------------------------------------+
-    -- |     p      | Used to output the priority of the logging event.       |
-    -- +------------+---------------------------------------------------------+
-    -- |     r      | Used to output the number of milliseconds elapsed from  |
-    -- |            | the construction of the layout until the creation of    |
-    -- |            | the logging event.                                      |
-    -- +------------+---------------------------------------------------------+
-    -- |     t      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     x      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     X      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     %      | The sequence %% outputs a single percent sign           |
-    -- +------------+---------------------------------------------------------+
-    --
-    -- @param Pattern Formatting pattern
-    -- @param Event Logging event
-    --
-    function Format(aPattern: in String; aEvent: in Log_Event) return String is
-        ch  : Character;
-        s   : Unbounded_String;
-        idx : Natural;
-    begin
-        idx := aPattern'First;
-        while idx <= aPattern'Last loop
-            ch := aPattern(idx);
-            if (ch = '%' and idx < aPattern'Last) then
-                idx := idx + 1;
-
-                declare
-                    width     : Integer := 0;
-                    max_width : Integer := 0;
-                    left_just : Boolean := False;
-                    param     : Unbounded_String := Null_Unbounded_String;
-                begin
-                    ch := aPattern(idx);
-
-                    -- check for a Last modifier
-                    if (ch = '-' or ch = '.' or ch in '0'..'9') then
-                        if (ch = '-') then
-                            left_just := True;
-                            idx := idx + 1;
-                        end if;
-
-                        -- determine width
-                        while (idx <= aPattern'Last and aPattern(idx) in '0'..'9') loop
-                            ch := aPattern(idx);
-                            width := (width * 10) + (Character'Pos(ch) - Character'Pos('0'));
-                            idx := idx + 1;
-                        end loop;
-
-                        -- max_width specified
-                        if (aPattern(idx) = '.') then
-                            idx := idx + 1;
-
-                            while (idx <= aPattern'Last and aPattern(idx) in '0'..'9') loop
-                                ch := aPattern(idx);
-                                max_width := (max_width * 10) + (Character'Pos(ch) - Character'Pos('0'));
-                                idx := idx + 1;
-                            end loop;
-                        end if;
-
-                        ch := aPattern(idx);
-                    end if;
-
-                    -- determine the pattern parameter
-                    if (idx + 1 < aPattern'Last) then
-                        if (aPattern(idx + 1) = '{') then
-                            idx := idx + 1;
-
-                            if (idx <= aPattern'Last) then
-                                idx := idx + 1;
-                                while (idx < aPattern'Last and aPattern(idx) /= '}') loop
-                                    Append(param, aPattern(idx));
-                                    idx := idx + 1;
-                                end loop;
-                            end if;
-                        end if;
-                    end if;
-
-                    -- process the conversion character
-                    case ch is
-                        when 'c' => null;
-                        when 'C' => null;
-                        when 'd' =>
-                            if (param = "ISO8601" or param = Null_Unbounded_String) then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, Image(aEvent.Timestamp, ISO8601_FORMAT)));
-                            elsif (param = "DATE") then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, Image(aEvent.Timestamp, DATE_FORMAT)));
-                            elsif (param = "ABSOLUTE") then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, Image(aEvent.Timestamp, ABSOLUTE_FORMAT)));
-                            else
-                                Append(s, Trim_and_Pad(width, max_width, left_just, Image(aEvent.Timestamp, ISO_DATE)));
-                            end if;
-                        when 'F' => null;
-                            if (aEvent.File_Name /= Null_Unbounded_String) then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, To_String(aEvent.File_Name)));
-                            end if;
-                        when 'l' => null;
-                        when 'L' => null;
-                            if (aEvent.Line_Number >= 0) then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, Natural'Image(aEvent.Line_Number)));
-                            end if;
-                        when 'm' => null;
-                            if (aEvent.Message /= Null_Unbounded_String) then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, To_String(aEvent.Message)));
-                            end if;
-                        when 'M' => null;
-                            if (aEvent.Entity /= Null_Unbounded_String) then
-                                Append(s, Trim_and_Pad(width, max_width, left_just, To_String(aEvent.Entity)));
-                            end if;
-                        when 'n' =>
-                            Append(s, ASCII.LF);
-                        when 'p' => null;
-                            Append(s, Trim_and_Pad(width, max_width, left_just, To_String(aEvent.Priority)));
-                        when 'r' => null;
-                        when 't' => null;
-                        when 'x' => null;
-                        when 'X' => null;
-                        when '%' => null;
-                        when others =>
-                            Append(s, ch);
-                    end case;
-                end;
-            else
-                Append(s, aPattern(idx));
-            end if;
-
-            idx := idx + 1;
-        end loop;
-        return To_String(s);
-    end Format;
+    Loggers         : Logger_Table.Map;
+    Appenders       : Appender_Table.Map;
 
     --
     -- Class that describes a protected logger instance.
@@ -300,25 +88,6 @@ package body Logging.Logger is
         begin
             Min_Priority_Level := aLevel;
         end Set_Level;
-
-        --
-        -- Set the logger output format pattern for all log messages. See Format()
-        -- for formatting conversion codes.
-        -- @param aPattern Message output pattern
-        --
-        procedure Set_Pattern(aPattern: in String) is
-        begin
-            Pattern := To_Unbounded_String(aPattern);
-        end Set_Pattern;
-
-        --
-        -- Return the current message formatting pattern.
-        -- @return Formatting pattern
-        --
-        function Get_Pattern return String is
-        begin
-            return To_String(Pattern);
-        end Get_Pattern;
 
         --
         -- Add an output appender to this logger
@@ -348,15 +117,15 @@ package body Logging.Logger is
                 event.Timestamp := Clock;
 
                 if Appenders.Is_Empty then
-                    Put(Console, event, Format(To_String(Pattern), event));
+                    Console.Put(event);
                 else
                     declare
                         aCursor: Appender_Vectors.Cursor := Appenders.First;
-                        aAppender: Appender_Class_Ptr;
+                        aAppender: Appender.Appender_Class_Ptr;
                     begin
                         while Appender_Vectors.Has_Element(aCursor) loop
                             aAppender := Appender_Vectors.Element(aCursor);
-                            aAppender.Put(event, Format(To_String(Pattern), event));
+                            aAppender.Put(event);
                             aCursor := Appender_Vectors.Next(aCursor);
                         end loop;
                     end;
@@ -378,15 +147,15 @@ package body Logging.Logger is
                 tmpEvent.Priority := aLevel;
 
                 if Appenders.Is_Empty then
-                    Put(Console, tmpEvent, Format(To_String(Pattern), tmpEvent));
+                    Console.Put(tmpEvent);
                 else
                     declare
                         aCursor: Appender_Vectors.Cursor := Appenders.First;
-                        aAppender: Appender_Class_Ptr;
+                        aAppender: Appender.Appender_Class_Ptr;
                     begin
                         while Appender_Vectors.Has_Element(aCursor) loop
                             aAppender := Appender_Vectors.Element(aCursor);
-                            aAppender.Put(tmpEvent, Format(To_String(Pattern), tmpEvent));
+                            aAppender.Put(tmpEvent);
                             aCursor := Appender_Vectors.Next(aCursor);
                         end loop;
                     end;
@@ -432,14 +201,107 @@ package body Logging.Logger is
         return aLogger;
     end Get_Logger;
 
+    function Starts_With(aString: in String; aFindString: in String) return Boolean is
+        Result : Boolean := False;
+    begin
+        if aString'Length >= aFindString'Length and then
+            aString(aString'First .. aString'First + aFindString'Length - 1) = aFindString then
+                Result := True;
+        end if;
+        return Result;
+    end Starts_With;
+
+    --
+    -- Constants for the intialization function
+    --
+    APPENDER_PREFIX:  constant String := "appender.";
+
     --
     -- Initialize the logging system with settings from the given 
     -- properties file.
     -- @param aFile_Name Name of the properties file
     --
     procedure Init_Logging(aFile_Name: in String) is
+        aProps:     Properties.Properties;
+        aKeys:      Properties.Key_Vector.Vector;
     begin
-        null;
+        Load(aProps, aFile_Name);
+        aKeys := aProps.Property_Names;
+
+        --
+        -- THIS NEEDS TO BE OPTIMIZED!!
+        --
+
+        -- first pass: find all appenders and create them in an associative container
+        for key_index in 0..Integer(aKeys.Length) - 1 loop
+            declare
+                aKeyString: constant String := To_String(aKeys(key_index));
+            begin
+                -- check for an appender line
+                if Starts_With(aKeyString, APPENDER_PREFIX) and then Count(aKeyString, ".") = 1 then
+                    declare
+                        aName: constant Unbounded_String := To_Unbounded_String(aKeyString(Index(aKeyString, ".") + 1 .. aKeyString'Last));
+                        aValue: constant Unbounded_String := To_Unbounded_String(aProps.Get_Property(aKeyString));
+                        aAppender: Appender.Appender_Class_Ptr := null;
+                    begin
+                        if aValue = "ConsoleAppender" then
+                            aAppender := new Console_Appender;
+                        elsif aValue = "FileAppender" then
+                            aAppender := new File_Appender;
+                        end if;
+                        if aAppender /= null then
+                            if Appenders.Find(aName) /= Appender_Table.No_Element then
+                                Appenders.Replace(Key => aName, New_Item => aAppender);
+                            else
+                                Appenders.Insert(Key => aName, New_Item => aAppender);
+                            end if;
+                        end if;
+                    end;
+                end if;
+            end;
+        end loop;
+
+        -- second pass: update the appenders with all of their properties
+        for key_index in 0..Integer(aKeys.Length) - 1 loop
+            declare
+                aKeyString: constant String := To_String(aKeys(key_index));
+            begin
+                if Starts_With(aKeyString, APPENDER_PREFIX) and then Count(aKeyString, ".") > 1 then
+                    declare
+                        aFirstDot:  constant Natural := Index(aKeyString, ".");
+                        aSecondDot: constant Natural := Index(aKeyString, ".", aFirstDot + 1);
+                        aName:      constant Unbounded_String := To_Unbounded_String(aKeyString(aFirstDot + 1 .. aSecondDot - 1));
+                        aParam:     constant Unbounded_String := To_Unbounded_String(aKeyString(aSecondDot + 1 .. aKeyString'Length));
+                        aValue:     constant Unbounded_String := To_Unbounded_String(aProps.Get_Property(aKeyString));
+                        aAppender:  Appender.Appender_Class_Ptr := null;
+                    begin
+                        if Appenders.Find(aName) /= Appender_Table.No_Element then
+                            aAppender := Appenders.Element(aName);
+                            if aParam = "layout" then
+                                aAppender.Set_Pattern(To_String(aValue));
+                            elsif aParam = "filename" then
+                                Appender.File_Appender_Ptr(aAppender).Set_File_Name(To_String(aValue));
+                            end if;
+                        end if;
+                    end;
+                end if;
+            end;
+        end loop;
+
+        -- third pass: create the loggers
+        for key_index in 0..Integer(aKeys.Length) - 1 loop
+            declare
+                aKeyString: constant String := To_String(aKeys(key_index));
+                aValue:     constant Unbounded_String := To_Unbounded_String(aProps.Get_Property(aKeyString));
+            begin
+                if aKeyString'Length > 0 and not Starts_With(aKeyString, APPENDER_PREFIX) then
+                    Ada.Text_IO.Put_Line(To_String(aValue));
+                end if;
+            end;
+        end loop;
     end Init_Logging;
 
+begin
+    Console.Set_Pattern("%d{ISO8601} %m%n");
 end Logging.Logger;
+

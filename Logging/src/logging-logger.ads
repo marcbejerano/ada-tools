@@ -42,102 +42,6 @@ with Logging.Event;         use Logging.Event;
 package Logging.Logger is
 
     --
-    -- Format the given Log_Event according to the pattern defined by the Pattern
-    -- argument. The Pattern formatting follows the same rules as the Log4J 1.2 API
-    -- formatting markers.
-    --
-    -- A flexible layout configurable with pattern string.  The goal of this function
-    -- is to format a Log_Event and return the results as a String. The results depend
-    -- on the conversion pattern.
-    --
-    -- The conversion pattern is closely related to the conversion pattern of the
-    -- printf function in C. A conversion pattern is composed of literal text and
-    -- format control expressions called conversion specifiers.
-    --
-    -- You are free to insert any literal text within the conversion pattern.
-    --
-    -- Each conversion specifier starts with a percent sign (%) and is followed by
-    -- optional format modifiers and a conversion character. The conversion character
-    -- specifies the type of data, e.g. category, priority, date, thread name. The
-    -- format modifiers control such things as field width, padding, left and right
-    -- justification. The following is a simple example.
-    --
-    -- Let the conversion pattern be "%-5p [%t]: %m%n" and assume that the logging
-    -- environment was set to use a Pattern. Then the statements
-    --
-    --   Logger root = Get_Logger("foo");
-    --   root.debug("Message 1");
-    --   root.warn("Message 2");
-    --
-    -- would yield the output
-    --
-    --   DEBUG [main]: Message 1
-    --   WARN  [main]: Message 2
-    --                     
-    -- Note that there is no explicit separator between text and conversion 
-    -- specifiers. The pattern parser knows when it has reached the end of a
-    -- conversion specifier when it reads a conversion character. In the
-    -- example above the conversion specifier %-5p means the priority of the
-    -- logging event should be left justified to a width of five characters.
-    -- The recognized conversion characters are:
-    --
-    -- +------------+---------------------------------------------------------+
-    -- | Conversion |                                                         |
-    -- |  Character |                        Effect                           |
-    -- +------------+---------------------------------------------------------+
-    -- |     c      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     C      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     d      | Used to output the date of the logging event. The date  |
-    -- |            | conversion specifier may be followed by a date format   |
-    -- |            | specifier enclosed between braces. For example,         |
-    -- |            | %d{HH:mm:ss,SSS} or %d{dd MMM yyyy HH:mm:ss,SSS}. If no |
-    -- |            | date format specifier is given then ISO8601 format is   |
-    -- |            | assumed.                                                |
-    -- |            |                                                         |
-    -- |            | See the Ada package GNAT.Calendar.Time_IO               |
-    -- |            |                                                         |
-    -- |            | For better results it is recommended to use one of the  |
-    -- |            | strings "ABSOLUTE", "DATE" and "ISO8601".               |
-    -- +------------+---------------------------------------------------------+
-    -- |     F      | Used to output the file name where the logging request  |
-    -- |            | was issued.                                             |
-    -- +------------+---------------------------------------------------------+
-    -- |     l      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     L      | Used to output the line number from where the logging   |
-    -- |            | request was issued.                                     |
-    -- +------------+---------------------------------------------------------+
-    -- |     m      | Used to output the application supplied message         |
-    -- |            | associated with the logging event.                      |
-    -- +------------+---------------------------------------------------------+
-    -- |     M      | Used to output the method (enclosing entity) name where |
-    -- |            | the logging request was issued.                         |
-    -- +------------+---------------------------------------------------------+
-    -- |     n      | Outputs the line separator strings "\n"                 |
-    -- +------------+---------------------------------------------------------+
-    -- |     p      | Used to output the priority of the logging event.       |
-    -- +------------+---------------------------------------------------------+
-    -- |     r      | Used to output the number of milliseconds elapsed from  |
-    -- |            | the construction of the layout until the creation of    |
-    -- |            | the logging event.                                      |
-    -- +------------+---------------------------------------------------------+
-    -- |     t      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     x      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     X      | Not used                                                |
-    -- +------------+---------------------------------------------------------+
-    -- |     %      | The sequence %% outputs a single percent sign           |
-    -- +------------+---------------------------------------------------------+
-    --
-    -- @param Pattern Formatting pattern
-    -- @param Event Logging event
-    --
-    function Format(aPattern: in String; aEvent: in Log_Event) return String;
-
-    --
     -- Class that describes a protected logger instance.
     --
     protected type Logger is
@@ -148,19 +52,6 @@ package Logging.Logger is
         -- @param aLevel Priorty level
         --
         procedure Set_Level(aLevel: in Level.Level);
-
-        --
-        -- Set the logger output format pattern for all log messages. See Format()
-        -- for formatting conversion codes.
-        -- @param aPattern Message output pattern
-        --
-        procedure Set_Pattern(aPattern: in String);
-        
-        --
-        -- Return the current message formatting pattern.
-        -- @return Formatting pattern
-        --
-        function Get_Pattern return String;
 
         --
         -- Add an output appender to this logger
@@ -212,7 +103,6 @@ package Logging.Logger is
 
     private
         Min_Priority_Level: Level.Level := Level.WARN;
-        Pattern: Unbounded_String := To_Unbounded_String("%d{ISO8601} [%-5p] %m%n");
         Appenders: Appender_Vectors.Vector;
 
     end Logger;

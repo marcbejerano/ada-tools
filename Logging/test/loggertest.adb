@@ -7,13 +7,21 @@ with GNAT.Source_Info;
 
 procedure LoggerTest is
 
-    myLogger : Logger_Ptr := Get_Logger("LoggerTest");
+    myLogger          : Logger_Ptr;
+    myFileAppender    : Appender_Class_Ptr;
+    myConsoleAppender : Appender_Class_Ptr;
 
 begin
     Init_Logging("logger.properties");
+    myLogger := Get_Logger("LoggerTest");
+    myConsoleAppender := new Console_Appender'(Pattern => To_Unbounded_String("%d{ISO8601} [%-5p] %F:[%-4L] %m%n"));
+    myFileAppender := new File_Appender'(
+        Pattern => To_Unbounded_String("%d{ISO8601} [%-5p] %F:[%-4L] %m%n"),
+        File_Name => To_Unbounded_String("test.log"));
+
     myLogger.Set_Level(TRACE);
-    myLogger.Add_Appender(new Console_Appender);
-    myLogger.Add_Appender(new File_Appender'(File_Name => To_Unbounded_String("test.log")));
+    myLogger.Add_Appender(myConsoleAppender);
+    myLogger.Add_Appender(myFileAppender);
     
     myLogger.Trace("TRACE woot!");
     myLogger.Debug("DEBUG woot!");
@@ -22,7 +30,6 @@ begin
     myLogger.Error("ERROR woot!");
     myLogger.Fatal("FATAL woot!");
 
-    myLogger.Set_Pattern("%d{ISO8601} [%-5p] %F:[%-4L] %m%n");
     myLogger.Error(New_Log_Event("Error Message", GNAT.Source_Info.File, GNAT.Source_Info.Line));
 
 
