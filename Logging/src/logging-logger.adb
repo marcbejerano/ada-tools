@@ -38,9 +38,8 @@ with Ada.Calendar;                  use Ada.Calendar;
 with Ada.Containers.Hashed_Maps;    use Ada.Containers;
 with Ada.Strings.Fixed;             use Ada.Strings.Fixed;
 with Ada.Strings.Unbounded.Hash;
+with GNAT.String_Split;
 with Properties;                    use Properties;
-
-with Ada.Text_IO;
 
 package body Logging.Logger is
 
@@ -70,7 +69,8 @@ package body Logging.Logger is
 
     use type Appender_Table.Cursor;
 
-    Console         : Console_Appender;
+    Console         : Appender_Class_Ptr;
+    Console_Logger  : Logger_Ptr;
     Loggers         : Logger_Table.Map;
     Appenders       : Appender_Table.Map;
 
@@ -99,6 +99,15 @@ package body Logging.Logger is
         end Add_Appender;
 
         --
+        -- Return the vector of Appenders contained in this logger.
+        -- @return Vector of appenders
+        --
+        function Get_Appenders return Appender.Appender_Vectors.Vector is
+        begin
+            return Appenders;
+        end Get_Appenders;
+
+        --
         -- Send the given log message with the specified priority to the logger's
         -- output handlers. If the specified priority is below the current minimum
         -- threshold then the message will be ignored.
@@ -108,29 +117,14 @@ package body Logging.Logger is
         procedure Log(aLevel: in Level.Level; aMessage: in String) is
             event : Log_Event;
         begin
-            if aLevel <= Min_Priority_Level then
-                event.File_Name := Null_Unbounded_String;
-                event.Entity := Null_Unbounded_String;
-                event.Line_Number := -1;
-                event.Priority := aLevel;
-                event.Message := To_Unbounded_String(aMessage);
-                event.Timestamp := Clock;
+            event.File_Name := Null_Unbounded_String;
+            event.Entity := Null_Unbounded_String;
+            event.Line_Number := -1;
+            event.Priority := aLevel;
+            event.Message := To_Unbounded_String(aMessage);
+            event.Timestamp := Clock;
 
-                if Appenders.Is_Empty then
-                    Console.Put(event);
-                else
-                    declare
-                        aCursor: Appender_Vectors.Cursor := Appenders.First;
-                        aAppender: Appender.Appender_Class_Ptr;
-                    begin
-                        while Appender_Vectors.Has_Element(aCursor) loop
-                            aAppender := Appender_Vectors.Element(aCursor);
-                            aAppender.Put(event);
-                            aCursor := Appender_Vectors.Next(aCursor);
-                        end loop;
-                    end;
-                end if;
-            end if;
+            Log(aLevel, event);
         end log;
         
         --
@@ -152,6 +146,7 @@ package body Logging.Logger is
                     declare
                         aCursor: Appender_Vectors.Cursor := Appenders.First;
                         aAppender: Appender.Appender_Class_Ptr;
+                        aNum: Integer := 1;
                     begin
                         while Appender_Vectors.Has_Element(aCursor) loop
                             aAppender := Appender_Vectors.Element(aCursor);
@@ -194,10 +189,12 @@ package body Logging.Logger is
     -- @return Logger object
     --
     function Get_Logger(aLoggerName: in String) return Logger_Ptr is
-      pragma Unreferenced (aLoggerName);
-        aLogger: Logger_Ptr := null;
+        aLogger: Logger_Ptr := Console_Logger;
+        aKey:    constant Unbounded_String := To_Unbounded_String(aLoggerName);
     begin
-        aLogger := new Logger;
+        if Loggers.Find(aKey) /= Logger_Table.No_Element then
+            aLogger := Loggers.Element(aKey);
+        end if;
         return aLogger;
     end Get_Logger;
 
@@ -215,6 +212,29 @@ package body Logging.Logger is
     -- Constants for the intialization function
     --
     APPENDER_PREFIX:  constant String := "appender.";
+
+    type StrArray is array (Positive range <>) of Ada.Strings.Unbounded.Unbounded_String;
+
+    function String_Split(aString: in String; aSeparator: in String := ",") return StrArray is
+        Tokens : GNAT.String_Split.Slice_Set;
+    begin
+        GNAT.String_Split.Create (S => Tokens,
+                               From => aString,
+                         Separators => aSeparator,
+                               Mode => GNAT.String_Split.Single);
+
+        declare
+            Output : StrArray(1 .. Natural(GNAT.String_Split.Slice_Count(Tokens)));
+        begin
+            for I in Output'Range loop
+                Output (I) :=
+                    Ada.Strings.Unbounded.To_Unbounded_String
+                        (GNAT.String_Split.Slice
+                            (Tokens, GNAT.String_Split.Slice_Number (I)));
+            end loop;
+            return Output;
+        end;
+    end String_Split;
 
     --
     -- Initialize the logging system with settings from the given 
@@ -293,15 +313,35 @@ package body Logging.Logger is
             declare
                 aKeyString: constant String := To_String(aKeys(key_index));
                 aValue:     constant Unbounded_String := To_Unbounded_String(aProps.Get_Property(aKeyString));
+                aTokens:    constant StrArray := String_Split(To_String(aValue));
             begin
                 if aKeyString'Length > 0 and not Starts_With(aKeyString, APPENDER_PREFIX) then
-                    Ada.Text_IO.Put_Line(To_String(aValue));
+                    declare
+                        aLogger: constant Logger_Ptr := new Logger;
+                    begin
+                        aLogger.Set_Level(Level.To_Level(To_String(aTokens(1))));
+                        for adx in 2 .. aTokens'Length loop
+                            if Appenders.Find(aTokens(adx)) /= Appender_Table.No_Element then
+                                aLogger.Add_Appender(Appenders.Element(aTokens(adx)));
+                            end if;
+                        end loop;
+
+                        if Loggers.Find(To_Unbounded_String(aKeyString)) /= Logger_Table.No_Element then
+                            Loggers.Replace(Key => To_Unbounded_String(aKeyString), New_Item => aLogger);
+                        else
+                            Loggers.Insert(Key => To_Unbounded_String(aKeyString), New_Item => aLogger);
+                        end if;
+                    end;
                 end if;
             end;
         end loop;
     end Init_Logging;
 
 begin
+    Console := new Console_Appender;
     Console.Set_Pattern("%d{ISO8601} %m%n");
+    Console_Logger := new Logger;
+    Console_Logger.Add_Appender(Console);
+    Console_Logger.Set_Level(DEBUG);
 end Logging.Logger;
 

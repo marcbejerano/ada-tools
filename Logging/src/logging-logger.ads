@@ -60,6 +60,12 @@ package Logging.Logger is
         procedure Add_Appender(aAppender: in Appender.Appender_Class_Ptr);
 
         --
+        -- Return the vector of Appenders contained in this logger.
+        -- @return Vector of appenders
+        --
+        function Get_Appenders return Appender.Appender_Vectors.Vector;
+
+        --
         -- Send the given log message with the specified priority to the logger's
         -- output handlers. If the specified priority is below the current minimum
         -- threshold then the message will be ignored.
