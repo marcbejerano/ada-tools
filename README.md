@@ -42,14 +42,29 @@ with Logging.Event;         use Logging.Event;
 with GNAT.Source_Info;
 
 procedure LoggerTest is
-    myLogger          : Logger_Ptr;
+    myLogger : Logger_Ptr;
 begin
     Init_Logging("logger.properties");
     myLogger := Get_Logger("LoggerTest");
 
     myLogger.Warn ("This is a warning message");
-    myLogger.Error(New_Log_Event("Error Message", GNAT.Source_Info.File, GNAT.Source_Info.Line));
+    myLogger.Error(New_Log_Event("Error Message",
+                           GNAT.Source_Info.File,
+                           GNAT.Source_Info.Line));
 end LoggerTest;
 ```
 
+The logging system is configured using a standard properties file (hence the need for the Properties library)
+
+```properties
+rootLogger=ERROR,stdout
+LoggerTest=DEBUG,stdout,file
+
+appender.stdout=ConsoleAppender
+appender.stdout.layout=%d{ISO8601} [%-5p] %m%n
+
+appender.file=FileAppender
+appender.file.filename=loggertest.log
+appender.file.layout=%d{ISO8601} [%-5p] %F(%-4L) %m%n
+```
 
