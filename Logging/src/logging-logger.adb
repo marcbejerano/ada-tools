@@ -146,7 +146,6 @@ package body Logging.Logger is
                     declare
                         aCursor: Appender_Vectors.Cursor := Appenders.First;
                         aAppender: Appender.Appender_Class_Ptr;
-                        aNum: Integer := 1;
                     begin
                         while Appender_Vectors.Has_Element(aCursor) loop
                             aAppender := Appender_Vectors.Element(aCursor);
