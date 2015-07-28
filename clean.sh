@@ -9,3 +9,5 @@ gprclean libAdaLogging.gpr
 
 cd test
 gprclean LoggerTest.gpr
+rm -f loggertest.log 2>/dev/null
+
