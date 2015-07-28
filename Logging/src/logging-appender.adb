@@ -1,4 +1,4 @@
--- @(#)File:            logging-appender.ads
+-- @(#)File:            logging-appender.adb
 -- @(#)Last changed:    Jul 21 2015 13:08:00
 -- @(#)Purpose:         Application and system logging
 -- @(#)Author:          Marc Bejerano <marcbejerano@gmail.com>
@@ -35,11 +35,15 @@
 -- OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 with Ada.Characters.Latin_1;
+with ADa.Direct_IO;
 with Ada.Text_IO;           use Ada.Text_IO;
 with GNAT.Calendar.Time_IO; use GNAT.Calendar.Time_IO;
 with Logging.Level;         use Logging.Level;
 
 package body Logging.Appender is
+
+    package Direct_Character_IO is new Ada.Direct_IO(Character);
+    use Direct_Character_IO;
 
     ISO8601_FORMAT  : constant Picture_String := "%Y-%m-%d %H:%M:%S,%i";
     ABSOLUTE_FORMAT : constant Picture_String := "%H:%M:%S,%i";
@@ -330,17 +334,22 @@ package body Logging.Appender is
     -- @param aString String to write
     --
     procedure Put(aAppender: in File_Appender; aEvent: in Log_Event) is
-        aFile: File_Type;
+        aFile: Direct_Character_IO.File_Type;
         aText: constant String := Format(aAppender.Get_Pattern, aEvent);
     begin
-        Open(aFile, Append_File, To_String(aAppender.File_Name));
-        Put(aFile, aText);
-        Close(aFile);
+        Direct_Character_IO.Open(aFile, Direct_Character_IO.Out_File, To_String(aAppender.File_Name));
+        Direct_Character_IO.Set_Index(aFile, Direct_Character_IO.Size(aFile) + 1);
+        for C in aText'First .. aText'Last loop
+            Direct_Character_IO.Write(aFile, aText(C));
+        end loop;
+        Direct_Character_IO.Close(aFile);
     exception
-        when Name_Error =>
-            Create(aFile, Out_File, To_String(aAppender.File_Name));
-            Put(aFile, aText);
-            Close(aFile);
+        when Direct_Character_IO.Name_Error =>
+            Direct_Character_IO.Create(aFile, Direct_Character_IO.Out_File, To_String(aAppender.File_Name));
+            for C in aText'First .. aText'Last loop
+                Direct_Character_IO.Write(aFile, aText(C));
+            end loop;
+            Direct_Character_IO.Close(aFile);
     end Put;
 
     --
