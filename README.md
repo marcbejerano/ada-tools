@@ -67,4 +67,5 @@ appender.file=FileAppender
 appender.file.filename=loggertest.log
 appender.file.layout=%d{ISO8601} [%-5p] %F(%-4L) %m%n
 ```
+*TODO:* Add cleanup on termination
 
