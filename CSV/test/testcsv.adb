@@ -5,6 +5,8 @@ procedure TestCSV is
     csv: CSV_File;
 
 begin
-    Put_Line("Testing CSV");
+    Open(csv, "FL_insurance_sample.csv", has_header => true);
+
+    Close(csv);
 end TestCSV;
 

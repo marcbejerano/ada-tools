@@ -91,7 +91,8 @@ package CSV is
     --
     procedure Open(csv: in out CSV_File;
              file_name: in String;
-                  mode: Ada.Text_IO.File_Mode := Ada.Text_IO.In_File;
+                  mode: in Ada.Text_IO.File_Mode := Ada.Text_IO.In_File;
+             delimiter: in String := ",";
             has_header: in Boolean := false);
 
     --
@@ -100,12 +101,47 @@ package CSV is
     --
     procedure Close(csv: in out CSV_File);
 
+    --
+    -- Return the column index for the named column. IF the named column does
+    -- not exist in the headers then a Contraint_Error will be thrown.
+    -- @param csv CSV File
+    -- @param column_name Name of column to look up
+    -- @return Index of the named column
+    --
+    function Column_Index(csv: in CSV_File;
+                  column_name: in String) return Natural;
+
+    --
+    -- Read the next line from the CSV file. If there are no more lines in the
+    -- file to read then an End_Error will be raised.
+    -- @param csv CSV File
+    -- @param delimiter Delimiter override (supercedes the CSV file object)
+    -- @return CSV_Record
+    --
+    function Read(csv: in CSV_File'Class;
+            delimiter: in String := ",") return CSV_Record;
+
+    --
+    -- Write the given CSV record into the provede CSV file using the delimiter
+    -- specified. If the use_quotes is set to True then all columns will be
+    -- emitted surrounded by double quotes and all quotes inside those columns
+    -- will be escaped (by double-quoting the double-quotes).
+    -- @param csv CSV File
+    -- @param rec CSV Record
+    -- @param delimiter Column delimiter
+    -- @param use_quotes Force column quotes
+    --
+    procedure Write(csv: in CSV_File'Class;
+                    rec: in CSV_Record;
+              delimiter: in String := ",";
+             use_quotes: in Boolean := True);
+
 private
 
     type CSV_File is tagged limited record
         headers: CSV_Record;
         file:    Ada.text_IO.File_Type;
-        delim:   String(1 .. 1) := ",";
+        delim:   Character := ',';
     end record;
 
 end CSV;
